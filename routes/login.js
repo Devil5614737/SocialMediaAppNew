@@ -3,9 +3,20 @@ const User = require("../models/User");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const Joi=require('joi')
 
 router.post("/login", async (req, res) => {
     const {email,password}=req.body
+
+const schema=Joi.object({
+  email:Joi.string().email().required(),
+  password:Joi.string().required(),
+})
+
+const {error}=schema.validate(req.body)
+if(error) return res.status(400).json(error.details[0].message);
+
+
   const user = await User.findOne({ email });
 
   if (!user) return res.status(400).json("Invalid Credentials");

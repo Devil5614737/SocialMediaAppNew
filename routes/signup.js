@@ -2,7 +2,8 @@ const express = require("express");
 const User = require("../models/User");
 const router = express.Router();
 const bcrypt = require("bcrypt");
-const jwt=require('jsonwebtoken')
+const jwt=require('jsonwebtoken');
+const Joi = require("joi");
 
 router.post("/signup", async (req, res) => {
   const { fullname, email, password } = req.body;
@@ -12,6 +13,17 @@ router.post("/signup", async (req, res) => {
     email,
     password,
   });
+
+
+  const schema=Joi.object({
+    fullname:Joi.string().required(),
+    email:Joi.string().email().required(),
+    password:Joi.string().required(),
+  })
+  
+  const {error}=schema.validate(req.body)
+  if(error) return res.status(400).json(error.details[0].message);
+
 
   const isRegistered = await User.findOne({ email });
   if (isRegistered) return res.status(400).json("User Already Registered");
